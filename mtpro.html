@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مُدرب جدول الضرب</title>
+    <style>
+        :root {
+            --primary-color: #6a0dad;
+            --secondary-color: #ffc107;
+            --background-color: #f0f8ff;
+            --card-color: #ffffff;
+            --correct-color: #28a745;
+            --wrong-color: #dc3545;
+            --text-color: #333;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Base styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            direction: rtl; /* Default to RTL */
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: var(--card-color);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .top-controls {
+            position: absolute;
+            top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang-switch, .audio-control, .speech-control {
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        /* Main menu */
+        #main-menu .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: var(--text-color);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .level-card {
+            background-color: var(--secondary-color);
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: var(--shadow);
+        }
+
+        .level-card.completed {
+            background-color: var(--correct-color);
+            color: white;
+        }
+
+        .level-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Game screen */
+        #game-screen {
+            display: none;
+        }
+
+        #game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .question-box {
+            background-color: #ffe082;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            min-height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #answer-input {
+            width: 150px;
+            padding: 10px;
+            font-size: 2rem;
+            text-align: center;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+        }
+
+        #timer {
+            font-size: 1.5rem;
+            color: var(--wrong-color);
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        #game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .score-display, .progress-display {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .score-display::before {
+            content: '⭐';
+        }
+
+        .progress-display::before {
+            content: '✅';
+        }
+
+        /* Matching game */
+        #matching-game .card-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .matching-card {
+            background-color: #add8e6;
+            border-radius: 8px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        .matching-card.flipped {
+            transform: rotateY(180deg);
+        }
+        .matching-card .front, .matching-card .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+        }
+        .matching-card .front {
+            background-color: #add8e6;
+            transform: rotateY(0deg);
+        }
+        .matching-card .back {
+            background-color: #ffffff;
+            transform: rotateY(180deg);
+        }
+
+        /* Parent/Teacher dashboard */
+        #teacher-dashboard {
+            display: none;
+            text-align: left;
+        }
+        .dashboard-stats {
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        .dashboard-stats strong {
+            color: var(--primary-color);
+        }
+        .trophy-cabinet {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .medal {
+            font-size: 2rem;
+        }
+
+        #print-sheet-btn, #reset-progress-btn {
+            margin-top: 20px;
+        }
+        
+        /* Achievements UI */
+        #achievements-section {
+            display: none;
+            text-align: left;
+            margin-top: 20px;
+        }
+        .achievement-card {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--secondary-color);
+        }
+        .achievement-card.unlocked {
+            border-left: 5px solid var(--correct-color);
+        }
+        
+        /* Language-specific styles */
+        body.en {
+            direction: ltr;
+        }
+        body.en .top-controls {
+            left: 20px;
+            right: auto;
+        }
+        
+        body.en .top-controls button {
+            direction: rtl; /* For text inside buttons */
+        }
+        
+        /* Animations */
+        @keyframes correct-answer {
+            0% { transform: scale(1); background-color: var(--correct-color); }
+            50% { transform: scale(1.1); background-color: var(--correct-color); }
+            100% { transform: scale(1); background-color: transparent; }
+        }
+        .correct-animation {
+            animation: correct-answer 0.5s ease-out forwards;
+        }
+
+        @keyframes wrong-answer {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        .wrong-animation {
+            animation: wrong-answer 0.4s ease-out;
+        }
+
+        /* Print styles for PDF/printing */
+        @media print {
+            body {
+                background-color: #fff;
+            }
+            .container, .top-controls, #main-menu, #game-screen, #teacher-dashboard button {
+                display: none !important;
+            }
+            #print-area {
+                display: block !important;
+                padding: 20px;
+                text-align: left;
+            }
+            #print-area h2 {
+                text-align: center;
+                font-size: 2rem;
+                margin-bottom: 20px;
+            }
+            .print-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+            }
+            .print-item {
+                border: 1px solid #ccc;
+                padding: 10px;
+                font-size: 1.2rem;
+            }
+        }
+        #print-area {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-controls">
+    <button class="lang-switch" onclick="app.toggleLanguage()">English</button>
+    <button class="audio-control" onclick="app.toggleAudio()">🔇</button>
+    <button class="speech-control" onclick="app.toggleSpeech()">🗣️</button>
+</div>
+
+<div class="container">
+
+    <div id="main-menu">
+        <h1 id="title">مُدرب جدول الضرب</h1>
+        <p id="tagline">اختر جدولاً لتبدأ التدريب عليه!</p>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" id="student-btn">طالب</button>
+            <button class="btn btn-secondary" id="teacher-btn">معلم/ولي أمر</button>
+            <button class="btn btn-secondary" id="achievements-btn">الإنجازات</button>
+        </div>
+
+        <div class="level-grid" id="level-grid">
+            </div>
+
+        <button class="btn btn-secondary" id="reset-progress-btn" style="display:none; margin-top: 20px;">إعادة تعيين التقدم</button>
+    </div>
+
+    <div id="game-screen">
+        <button class="btn btn-secondary" onclick="app.showMainMenu()">عودة</button>
+
+        <h2 id="game-title">تحدي جدول الضرب</h2>
+        <div id="game-controls">
+            <button class="btn btn-primary" id="practice-btn">تدريب عشوائي</button>
+            <button class="btn btn-primary" id="timed-btn">تحدي مؤقت</button>
+            <button class="btn btn-primary" id="matching-btn">لعبة المطابقة</button>
+        </div>
+
+        <div id="timed-challenge-ui" style="display: none;">
+            <p id="timer"></p>
+        </div>
+
+        <div id="practice-ui" style="display: none;">
+            <div id="question-box" class="question-box">5 × 5 = ?</div>
+            <input type="number" id="answer-input" placeholder="الجواب" inputmode="numeric">
+            <p id="feedback-message"></p>
+        </div>
+
+        <div id="matching-game" style="display: none;">
+            <div class="card-grid" id="matching-cards"></div>
+        </div>
+    </div>
+
+    <div id="teacher-dashboard">
+        <button class="btn btn-secondary" onclick="app.showMainMenu()">عودة</button>
+        <h2 id="teacher-dashboard-title">لوحة تحكم المعلم/ولي الأمر</h2>
+        <div class="dashboard-stats">
+            <p id="total-score-display"><strong>إجمالي النقاط:</strong> 0</p>
+            <p id="medals-display"><strong>الميداليات:</strong> <span class="trophy-cabinet"></span></p>
+            <p id="best-time-display"><strong>أفضل وقت في التحدي:</strong> --</p>
+        </div>
+        <button class="btn btn-primary" id="print-sheet-btn">طباعة ورقة تدريب</button>
+    </div>
+    
+    <div id="achievements-section">
+        <button class="btn btn-secondary" onclick="app.showMainMenu()">عودة</button>
+        <h2 id="achievements-title">الإنجازات</h2>
+        <div id="achievements-list">
+            </div>
+    </div>
+
+    <div id="print-area"></div>
+</div>
+
+<audio id="correct-sound" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" preload="auto"></audio>
+<audio id="wrong-sound" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3" preload="auto"></audio>
+<audio id="win-sound" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3" preload="auto"></audio>
+
+<script>
+// JavaScript code
+const app = (function() {
+    // Localization object
+    const translations = {
+        ar: {
+            title: "مُدرب جدول الضرب",
+            tagline: "اختر جدولاً لتبدأ التدريب عليه!",
+            studentBtn: "طالب",
+            teacherBtn: "معلم/ولي أمر",
+            achievementsBtn: "الإنجازات",
+            resetProgress: "إعادة تعيين التقدم",
+            back: "عودة",
+            practiceBtn: "تدريب عشوائي",
+            timedBtn: "تحدي مؤقت",
+            matchingBtn: "لعبة المطابقة",
+            answerPlaceholder: "الجواب",
+            teacherDashboardTitle: "لوحة تحكم المعلم/ولي الأمر",
+            totalScore: "إجمالي النقاط:",
+            medals: "الميداليات:",
+            bestTime: "أفضل وقت في التحدي:",
+            printSheet: "طباعة ورقة تدريب",
+            printTitle: "ورقة تدريب جدول الضرب",
+            correctMsg: ["أحسنت!", "رائع!", "ممتاز!"],
+            wrongMsg: ["حاول مرة أخرى!", "لم توفق.", "لا بأس، جرب مجدداً."],
+            languageBtn: "English",
+            medalBronze: "برونزية",
+            medalSilver: "فضية",
+            medalGold: "ذهبية",
+            medalBronzeEmoji: "🥉",
+            medalSilverEmoji: "🥈",
+            medalGoldEmoji: "🥇",
+            achievementTitle: "الإنجازات",
+            achievement_1_title: "المبتدئ",
+            achievement_1_desc: "أكمل أول مستوى.",
+            achievement_2_title: "نجم التحدي",
+            achievement_2_desc: "أكمل تحدي مؤقت في أقل من 20 ثانية.",
+            achievement_3_title: "الخبير",
+            achievement_3_desc: "أكمل جميع المستويات (1-12).",
+        },
+        en: {
+            title: "Multiplication Trainer",
+            tagline: "Select a table to start practicing!",
+            studentBtn: "Student",
+            teacherBtn: "Parent/Teacher",
+            achievementsBtn: "Achievements",
+            resetProgress: "Reset Progress",
+            back: "Back",
+            practiceBtn: "Practice",
+            timedBtn: "Timed Challenge",
+            matchingBtn: "Matching Game",
+            answerPlaceholder: "Answer",
+            teacherDashboardTitle: "Parent/Teacher Dashboard",
+            totalScore: "Total Score:",
+            medals: "Medals:",
+            bestTime: "Best Timed Challenge:",
+            printSheet: "Print Worksheet",
+            printTitle: "Multiplication Worksheet",
+            correctMsg: ["Great job!", "Awesome!", "Excellent!"],
+            wrongMsg: ["Try again!", "Not quite.", "Don't give up!"],
+            languageBtn: "العربية",
+            medalBronze: "Bronze",
+            medalSilver: "Silver",
+            medalGold: "Gold",
+            medalBronzeEmoji: "🥉",
+            medalSilverEmoji: "🥈",
+            medalGoldEmoji: "🥇",
+            achievementTitle: "Achievements",
+            achievement_1_title: "The Beginner",
+            achievement_1_desc: "Complete your first level.",
+            achievement_2_title: "Challenge Star",
+            achievement_2_desc: "Complete a timed challenge in under 20 seconds.",
+            achievement_3_title: "The Expert",
+            achievement_3_desc: "Complete all levels (1-12).",
+        }
+    };
+
+    let currentLang = 'ar';
+    let gameData = {
+        levels: {},
+        totalScore: 0,
+        bestTime: null,
+        achievements: {
+            beginner: false,
+            challengeStar: false,
+            expert: false
+        }
+    };
+
+    let currentLevel = 0;
+    let currentMode = '';
+    let practiceQuestion = null;
+    let timedChallenge = {
+        questions: [],
+        currentQ: 0,
+        startTime: null,
+        timerInterval: null,
+        score: 0,
+    };
+    
+    let audioEnabled = true;
+    let speechEnabled = true;
+
+    // DOM Elements
+    const elements = {
+        body: document.body,
+        langSwitch: document.querySelector('.lang-switch'),
+        audioControl: document.querySelector('.audio-control'),
+        speechControl: document.querySelector('.speech-control'),
+        mainMenu: document.getElementById('main-menu'),
+        gameScreen: document.getElementById('game-screen'),
+        teacherDashboard: document.getElementById('teacher-dashboard'),
+        achievementsSection: document.getElementById('achievements-section'),
+        levelGrid: document.getElementById('level-grid'),
+        studentBtn: document.getElementById('student-btn'),
+        teacherBtn: document.getElementById('teacher-btn'),
+        achievementsBtn: document.getElementById('achievements-btn'),
+        resetProgressBtn: document.getElementById('reset-progress-btn'),
+        title: document.getElementById('title'),
+        tagline: document.getElementById('tagline'),
+        practiceBtn: document.getElementById('practice-btn'),
+        timedBtn: document.getElementById('timed-btn'),
+        matchingBtn: document.getElementById('matching-btn'),
+        gameTitle: document.getElementById('game-title'),
+        practiceUI: document.getElementById('practice-ui'),
+        timedUI: document.getElementById('timed-challenge-ui'),
+        matchingUI: document.getElementById('matching-game'),
+        questionBox: document.getElementById('question-box'),
+        answerInput: document.getElementById('answer-input'),
+        feedbackMessage: document.getElementById('feedback-message'),
+        timerDisplay: document.getElementById('timer'),
+        teacherDashboardTitle: document.getElementById('teacher-dashboard-title'),
+        totalScoreDisplay: document.getElementById('total-score-display'),
+        medalsDisplay: document.getElementById('medals-display'),
+        bestTimeDisplay: document.getElementById('best-time-display'),
+        printSheetBtn: document.getElementById('print-sheet-btn'),
+        printArea: document.getElementById('print-area'),
+        correctSound: document.getElementById('correct-sound'),
+        wrongSound: document.getElementById('wrong-sound'),
+        winSound: document.getElementById('win-sound'),
+        achievementsTitle: document.getElementById('achievements-title'),
+        achievementsList: document.getElementById('achievements-list'),
+    };
+
+    // --- Core Functions ---
+    function init() {
+        loadData();
+        applyTranslations();
+        renderLevelGrid();
+        bindEvents();
+        showMainMenu();
+        updateAudioControls();
+        updateSpeechControls();
+    }
+
+    function loadData() {
+        const storedData = localStorage.getItem('multiplication_trainer_v2');
+        if (storedData) {
+            gameData = JSON.parse(storedData);
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem('multiplication_trainer_v2', JSON.stringify(gameData));
+    }
+
+    function applyTranslations() {
+        const lang = translations[currentLang];
+        elements.body.className = currentLang;
+        elements.langSwitch.textContent = translations[currentLang === 'ar' ? 'en' : 'ar'].languageBtn;
+        elements.title.textContent = lang.title;
+        elements.tagline.textContent = lang.tagline;
+        elements.studentBtn.textContent = lang.studentBtn;
+        elements.teacherBtn.textContent = lang.teacherBtn;
+        elements.achievementsBtn.textContent = lang.achievementsBtn;
+        elements.resetProgressBtn.textContent = lang.resetProgress;
+        elements.practiceBtn.textContent = lang.practiceBtn;
+        elements.timedBtn.textContent = lang.timedBtn;
+        elements.matchingBtn.textContent = lang.matchingBtn;
+        elements.answerInput.placeholder = lang.answerPlaceholder;
+        elements.teacherDashboardTitle.textContent = lang.teacherDashboardTitle;
+        elements.totalScoreDisplay.innerHTML = `<strong>${lang.totalScore}</strong> ${gameData.totalScore}`;
+        elements.bestTimeDisplay.innerHTML = `<strong>${lang.bestTime}</strong> ${gameData.bestTime ? (gameData.bestTime / 1000).toFixed(2) + 's' : '--'}`;
+        elements.printSheetBtn.textContent = lang.printSheet;
+        elements.achievementsTitle.textContent = lang.achievementTitle;
+
+        renderMedals();
+        renderAchievements();
+    }
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'ar' ? 'en' : 'ar';
+        applyTranslations();
+    }
+    
+    function toggleAudio() {
+        audioEnabled = !audioEnabled;
+        updateAudioControls();
+    }
+    
+    function toggleSpeech() {
+        speechEnabled = !speechEnabled;
+        updateSpeechControls();
+    }
+    
+    function updateAudioControls() {
+        elements.audioControl.textContent = audioEnabled ? '🔊' : '🔇';
+    }
+    
+    function updateSpeechControls() {
+        elements.speechControl.textContent = speechEnabled ? '🗣️' : '🤫';
+    }
+    
+    function playSound(sound) {
+        if (audioEnabled) {
+            sound.currentTime = 0;
+            sound.play();
+        }
+    }
+    
+    function speakText(text) {
+        if (speechEnabled) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = currentLang === 'ar' ? 'ar-SA' : 'en-US';
+            utterance.rate = 0.9;
+            speechSynthesis.speak(utterance);
+        }
+    }
+
+    function showMainMenu() {
+        elements.mainMenu.style.display = 'block';
+        elements.gameScreen.style.display = 'none';
+        elements.teacherDashboard.style.display = 'none';
+        elements.achievementsSection.style.display = 'none';
+        
+        // Reset and hide game UI
+        clearInterval(timedChallenge.timerInterval);
+        elements.timedUI.style.display = 'none';
+        elements.practiceUI.style.display = 'none';
+        elements.matchingUI.style.display = 'none';
+        
+        elements.resetProgressBtn.style.display = 'none';
+        elements.studentBtn.onclick = () => {};
+        elements.teacherBtn.onclick = showTeacherDashboard;
+        elements.achievementsBtn.onclick = showAchievements;
+    }
+
+    function showGameScreen(level) {
+        currentLevel = level;
+        elements.gameTitle.textContent = `${translations[currentLang].title} - ${level}`;
+        elements.mainMenu.style.display = 'none';
+        elements.gameScreen.style.display = 'block';
+        elements.teacherDashboard.style.display = 'none';
+        elements.achievementsSection.style.display = 'none';
+        elements.practiceUI.style.display = 'none';
+        elements.timedUI.style.display = 'none';
+        elements.matchingUI.style.display = 'none';
+    }
+
+    function showTeacherDashboard() {
+        elements.mainMenu.style.display = 'none';
+        elements.gameScreen.style.display = 'none';
+        elements.teacherDashboard.style.display = 'block';
+        elements.achievementsSection.style.display = 'none';
+        elements.resetProgressBtn.style.display = 'block';
+        
+        elements.totalScoreDisplay.innerHTML = `<strong>${translations[currentLang].totalScore}</strong> ${gameData.totalScore}`;
+        elements.bestTimeDisplay.innerHTML = `<strong>${translations[currentLang].bestTime}</strong> ${gameData.bestTime ? (gameData.bestTime / 1000).toFixed(2) + 's' : '--'}`;
+        renderMedals();
+    }
+    
+    function showAchievements() {
+        elements.mainMenu.style.display = 'none';
+        elements.gameScreen.style.display = 'none';
+        elements.teacherDashboard.style.display = 'none';
+        elements.achievementsSection.style.display = 'block';
+        renderAchievements();
+    }
+
+    function renderMedals() {
+        const cabinet = elements.medalsDisplay.querySelector('.trophy-cabinet');
+        cabinet.innerHTML = '';
+        if (gameData.totalScore >= 50) {
+            const medal = document.createElement('span');
+            medal.className = 'medal';
+            medal.textContent = translations[currentLang].medalBronzeEmoji;
+            cabinet.appendChild(medal);
+        }
+        if (gameData.totalScore >= 200) {
+            const medal = document.createElement('span');
+            medal.className = 'medal';
+            medal.textContent = translations[currentLang].medalSilverEmoji;
+            cabinet.appendChild(medal);
+        }
+        if (gameData.totalScore >= 500) {
+            const medal = document.createElement('span');
+            medal.className = 'medal';
+            medal.textContent = translations[currentLang].medalGoldEmoji;
+            cabinet.appendChild(medal);
+        }
+    }
+    
+    function renderAchievements() {
+        const list = elements.achievementsList;
+        list.innerHTML = '';
+        
+        const achievements = [
+            { id: 'beginner', title: translations[currentLang].achievement_1_title, desc: translations[currentLang].achievement_1_desc },
+            { id: 'challengeStar', title: translations[currentLang].achievement_2_title, desc: translations[currentLang].achievement_2_desc },
+            { id: 'expert', title: translations[currentLang].achievement_3_title, desc: translations[currentLang].achievement_3_desc },
+        ];
+        
+        achievements.forEach(ach => {
+            const isUnlocked = gameData.achievements[ach.id];
+            const card = document.createElement('div');
+            card.className = `achievement-card ${isUnlocked ? 'unlocked' : ''}`;
+            card.innerHTML = `
+                <h4>${isUnlocked ? '✅' : '🔒'} ${ach.title}</h4>
+                <p>${ach.desc}</p>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    function checkAchievements() {
+        // Beginner: Complete one level
+        if (Object.values(gameData.levels).some(level => level.completed) && !gameData.achievements.beginner) {
+            gameData.achievements.beginner = true;
+            playSound(elements.winSound);
+            alert(`🎉 ${translations[currentLang].achievement_1_title} ${translations[currentLang].correctMsg[0]}`);
+        }
+        
+        // Expert: Complete all levels
+        const allLevelsCompleted = Array.from({ length: 12 }, (_, i) => i + 1).every(level => gameData.levels[level] && gameData.levels[level].completed);
+        if (allLevelsCompleted && !gameData.achievements.expert) {
+            gameData.achievements.expert = true;
+            playSound(elements.winSound);
+            alert(`🏆 ${translations[currentLang].achievement_3_title} ${translations[currentLang].correctMsg[0]}`);
+        }
+        
+        saveData();
+    }
+
+    function renderLevelGrid() {
+        elements.levelGrid.innerHTML = '';
+        for (let i = 1; i <= 12; i++) {
+            const levelCard = document.createElement('div');
+            levelCard.className = `level-card`;
+            if (gameData.levels[i] && gameData.levels[i].completed) {
+                levelCard.classList.add('completed');
+            }
+            levelCard.textContent = i;
+            levelCard.onclick = () => showGameScreen(i);
+            elements.levelGrid.appendChild(levelCard);
+        }
+    }
+
+    function resetProgress() {
+        if (confirm(translations[currentLang].resetProgress + '؟')) {
+            localStorage.removeItem('multiplication_trainer_v2');
+            gameData = {
+                levels: {},
+                totalScore: 0,
+                bestTime: null,
+                achievements: { beginner: false, challengeStar: false, expert: false }
+            };
+            renderLevelGrid();
+            showMainMenu();
+            applyTranslations();
+        }
+    }
+
+    // --- Game Logic ---
+    function generateQuestion(level) {
+        const num1 = level;
+        const num2 = Math.floor(Math.random() * 10) + 1;
+        const questionText = `${num1} × ${num2} = ?`;
+        return {
+            question: questionText,
+            answer: num1 * num2,
+        };
+    }
+
+    function startGame(mode) {
+        currentMode = mode;
+        elements.practiceUI.style.display = 'none';
+        elements.timedUI.style.display = 'none';
+        elements.matchingUI.style.display = 'none';
+
+        if (mode === 'practice') {
+            elements.practiceUI.style.display = 'block';
+            nextPracticeQuestion();
+            elements.answerInput.focus();
+        } else if (mode === 'timed') {
+            elements.practiceUI.style.display = 'block';
+            startTimedChallenge();
+            elements.answerInput.focus();
+        } else if (mode === 'matching') {
+            elements.matchingUI.style.display = 'block';
+            startMatchingGame();
+        }
+    }
+
+    // Practice Mode
+    function nextPracticeQuestion() {
+        practiceQuestion = generateQuestion(currentLevel);
+        elements.questionBox.textContent = practiceQuestion.question;
+        speakText(practiceQuestion.question);
+        elements.answerInput.value = '';
+        elements.feedbackMessage.textContent = '';
+        elements.questionBox.classList.remove('correct-animation', 'wrong-animation');
+    }
+
+    function checkAnswer(event) {
+        if (event.key === 'Enter') {
+            const userAnswer = parseInt(elements.answerInput.value, 10);
+            if (isNaN(userAnswer)) {
+                elements.feedbackMessage.textContent = "الجواب يجب أن يكون رقماً!";
+                return;
+            }
+
+            if (userAnswer === practiceQuestion.answer) {
+                elements.feedbackMessage.textContent = translations[currentLang].correctMsg[Math.floor(Math.random() * translations[currentLang].correctMsg.length)];
+                elements.questionBox.classList.add('correct-animation');
+                playSound(elements.correctSound);
+                
+                gameData.totalScore += 1;
+                saveData();
+                
+                setTimeout(() => {
+                    nextPracticeQuestion();
+                }, 1000);
+            } else {
+                elements.feedbackMessage.textContent = translations[currentLang].wrongMsg[Math.floor(Math.random() * translations[currentLang].wrongMsg.length)];
+                elements.questionBox.classList.add('wrong-animation');
+                playSound(elements.wrongSound);
+            }
+        }
+    }
+
+    // Timed Challenge Mode
+    function startTimedChallenge() {
+        timedChallenge.questions = [];
+        for (let i = 0; i < 10; i++) {
+            timedChallenge.questions.push(generateQuestion(currentLevel));
+        }
+        timedChallenge.currentQ = 0;
+        timedChallenge.score = 0;
+        timedChallenge.startTime = Date.now();
+        elements.timedUI.style.display = 'block';
+        nextTimedQuestion();
+
+        timedChallenge.timerInterval = setInterval(() => {
+            const elapsedTime = Date.now() - timedChallenge.startTime;
+            elements.timerDisplay.textContent = `⏱️ ${(elapsedTime / 1000).toFixed(2)}s`;
+        }, 100);
+    }
+
+    function nextTimedQuestion() {
+        if (timedChallenge.currentQ < timedChallenge.questions.length) {
+            practiceQuestion = timedChallenge.questions[timedChallenge.currentQ];
+            elements.questionBox.textContent = practiceQuestion.question;
+            speakText(practiceQuestion.question);
+            elements.answerInput.value = '';
+            elements.feedbackMessage.textContent = '';
+            elements.questionBox.classList.remove('correct-animation', 'wrong-animation');
+            elements.answerInput.focus();
+        } else {
+            endTimedChallenge();
+        }
+    }
+
+    function checkTimedAnswer(event) {
+        if (event.key === 'Enter') {
+            const userAnswer = parseInt(elements.answerInput.value, 10);
+            const isCorrect = userAnswer === practiceQuestion.answer;
+            if (isCorrect) {
+                timedChallenge.score++;
+                gameData.totalScore += 1;
+                playSound(elements.correctSound);
+                elements.questionBox.classList.add('correct-animation');
+            } else {
+                playSound(elements.wrongSound);
+                elements.questionBox.classList.add('wrong-animation');
+            }
+            timedChallenge.currentQ++;
+            setTimeout(nextTimedQuestion, 500);
+        }
+    }
+
+    function endTimedChallenge() {
+        clearInterval(timedChallenge.timerInterval);
+        const totalTime = Date.now() - timedChallenge.startTime;
+        const resultMsg = `${translations[currentLang].correctMsg[0]}! لقد أجبت على ${timedChallenge.score} من 10 في ${ (totalTime / 1000).toFixed(2)} ثانية.`;
+        
+        if (timedChallenge.score === 10) {
+            if (!gameData.levels[currentLevel]) {
+                gameData.levels[currentLevel] = { completed: false };
+            }
+            gameData.levels[currentLevel].completed = true;
+            renderLevelGrid();
+            playSound(elements.winSound);
+        }
+
+        if (!gameData.bestTime || totalTime < gameData.bestTime) {
+            gameData.bestTime = totalTime;
+        }
+        
+        // Check for Challenge Star achievement
+        if (totalTime < 20000 && !gameData.achievements.challengeStar) {
+            gameData.achievements.challengeStar = true;
+            playSound(elements.winSound);
+            alert(`🎉 ${translations[currentLang].achievement_2_title} ${translations[currentLang].correctMsg[0]}!`);
+        }
+        
+        checkAchievements();
+        saveData();
+        alert(resultMsg);
+        showGameScreen(currentLevel);
+    }
+
+    // Matching Game
+    function startMatchingGame() {
+        const questions = [];
+        for (let i = 0; i < 6; i++) {
+            questions.push(generateQuestion(currentLevel));
+        }
+        
+        const cards = [];
+        questions.forEach(q => {
+            cards.push({ id: q.question, value: q.question, matched: false, type: 'q' });
+            cards.push({ id: q.question, value: q.answer, matched: false, type: 'a' });
+        });
+
+        cards.sort(() => Math.random() - 0.5);
+        elements.matchingCards.innerHTML = '';
+        
+        let flippedCards = [];
+        let canFlip = true;
+
+        cards.forEach(card => {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'matching-card';
+            cardEl.innerHTML = `<div class="front"></div><div class="back">${card.value}</div>`;
+            cardEl.dataset.id = card.id;
+
+            cardEl.addEventListener('click', () => {
+                if (!canFlip || flippedCards.length >= 2 || cardEl.classList.contains('flipped')) {
+                    return;
+                }
+                
+                playSound(elements.correctSound);
+                cardEl.classList.add('flipped');
+                flippedCards.push(cardEl);
+
+                if (flippedCards.length === 2) {
+                    canFlip = false;
+                    setTimeout(() => {
+                        const [card1, card2] = flippedCards;
+                        if (card1.dataset.id === card2.dataset.id) {
+                            card1.classList.add('matched');
+                            card2.classList.add('matched');
+                            gameData.totalScore += 2;
+                            saveData();
+                            checkWinCondition();
+                        } else {
+                            card1.classList.remove('flipped');
+                            card2.classList.remove('flipped');
+                            playSound(elements.wrongSound);
+                        }
+                        flippedCards = [];
+                        canFlip = true;
+                    }, 1000);
+                }
+            });
+
+            elements.matchingCards.appendChild(cardEl);
+        });
+
+        function checkWinCondition() {
+            const allMatched = document.querySelectorAll('.matching-card:not(.flipped)').length === 0;
+            if (allMatched) {
+                alert("تهانينا! أكملت اللعبة!");
+                if (!gameData.levels[currentLevel]) {
+                    gameData.levels[currentLevel] = { completed: true };
+                    renderLevelGrid();
+                    saveData();
+                }
+                checkAchievements();
+                showGameScreen(currentLevel);
+            }
+        }
+    }
+
+    // Print Logic
+    function generatePrintSheet() {
+        const selectedLevel = currentLevel;
+        if (selectedLevel === 0) {
+            alert('يجب اختيار مستوى أولاً.');
+            return;
+        }
+
+        elements.printArea.innerHTML = `
+            <h2>${translations[currentLang].printTitle} - ${selectedLevel}</h2>
+            <div class="print-grid"></div>
+        `;
+
+        const printGrid = elements.printArea.querySelector('.print-grid');
+        for (let i = 1; i <= 12; i++) {
+            const question = `${selectedLevel} × ${i} = ______`;
+            const printItem = document.createElement('div');
+            printItem.className = 'print-item';
+            printItem.textContent = question;
+            printGrid.appendChild(printItem);
+        }
+
+        window.print();
+    }
+
+    function bindEvents() {
+        elements.studentBtn.addEventListener('click', showMainMenu);
+        elements.teacherBtn.addEventListener('click', showTeacherDashboard);
+        elements.achievementsBtn.addEventListener('click', showAchievements);
+        elements.resetProgressBtn.addEventListener('click', resetProgress);
+        
+        elements.practiceBtn.addEventListener('click', () => startGame('practice'));
+        elements.timedBtn.addEventListener('click', () => startGame('timed'));
+        elements.matchingBtn.addEventListener('click', () => startGame('matching'));
+
+        elements.answerInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                if (currentMode === 'practice') {
+                    checkAnswer(e);
+                } else if (currentMode === 'timed') {
+                    checkTimedAnswer(e);
+                }
+            }
+        });
+
+        elements.printSheetBtn.addEventListener('click', generatePrintSheet);
+    }
+
+    // Initial setup
+    document.addEventListener('DOMContentLoaded', init);
+
+    return {
+        showMainMenu,
+        toggleLanguage,
+        toggleAudio,
+        toggleSpeech,
+    };
+})();
+</script>
+
+</body>
+</html>
+
